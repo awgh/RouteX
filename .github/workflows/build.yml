@@ -1,0 +1,45 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    strategy:
+      matrix:
+        xcode: ['14.3', '15.0']
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Select Xcode
+      run: sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
+      
+    - name: Show Xcode version
+      run: xcodebuild -version
+      
+    - name: Show Swift version
+      run: swift --version
+      
+    - name: Build RouteX
+      run: |
+        chmod +x ./build.sh
+        ./build.sh
+        
+    - name: Build for release
+      run: |
+        xcodebuild archive -project RouteX.xcodeproj -scheme RouteX -archivePath RouteX.xcarchive -derivedDataPath build/DerivedData
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: RouteX-${{ matrix.xcode }}
+        path: RouteX.xcarchive
+        
+ 

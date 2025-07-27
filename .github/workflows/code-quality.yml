@@ -1,0 +1,80 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  lint:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Install SwiftLint
+      run: |
+        brew install swiftlint
+        
+    - name: Run SwiftLint
+      run: |
+        swiftlint lint --reporter github-actions-logging
+        
+  security:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Security audit
+      run: |
+        echo "Running security audit..."
+        
+        # Check for hardcoded secrets
+        echo "Checking for hardcoded secrets..."
+        if grep -r -i "password\|secret\|key\|token\|api_key" RouteX/ --exclude-dir=*.git --exclude=*.md --exclude=*.plist; then
+          echo "Warning: Potential hardcoded secrets found"
+          exit 1
+        fi
+        
+        # Check for proper file permissions
+        echo "Checking file permissions..."
+        find RouteX/ -type f -exec ls -la {} \;
+        
+        # Check for proper entitlements
+        echo "Checking entitlements..."
+        if [ -f "RouteX/RouteX.entitlements" ]; then
+          echo "Entitlements file found"
+        else
+          echo "No entitlements file found - this may be intentional"
+        fi
+        
+        echo "Security audit completed successfully"
+        
+  format:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Check code formatting
+      run: |
+        echo "Checking code formatting..."
+        
+        # Check for trailing whitespace
+        if grep -r " $" RouteX/ --exclude-dir=*.git --exclude=*.md; then
+          echo "Error: Found trailing whitespace"
+          exit 1
+        fi
+        
+        # Check for proper line endings
+        if grep -r $'\r' RouteX/ --exclude-dir=*.git --exclude=*.md; then
+          echo "Error: Found Windows line endings"
+          exit 1
+        fi
+        
+        echo "Code formatting check passed" 

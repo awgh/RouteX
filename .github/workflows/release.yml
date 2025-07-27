@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Get version
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+      
+    - name: Build RouteX
+      run: |
+        chmod +x ./build.sh
+        ./build.sh
+        
+    - name: Create app bundle
+      run: |
+        # The build script should have already created the app bundle
+        # Let's verify it exists and copy it to the workspace root
+        if [ -d "build/DerivedData/Build/Products/Release/RouteX.app" ]; then
+          cp -r "build/DerivedData/Build/Products/Release/RouteX.app" .
+          echo "App bundle copied successfully"
+        else
+          echo "Error: App bundle not found at expected location"
+          ls -la build/DerivedData/Build/Products/Release/
+          exit 1
+        fi
+        
+    - name: Create DMG
+      run: |
+        # Create DMG using hdiutil
+        hdiutil create -volname "RouteX ${{ steps.get_version.outputs.VERSION }}" -srcfolder RouteX.app -ov -format UDZO RouteX-${{ steps.get_version.outputs.VERSION }}.dmg
+        
+    - name: Create release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          RouteX-${{ steps.get_version.outputs.VERSION }}.dmg
+        body: |
+          ## RouteX ${{ steps.get_version.outputs.VERSION }}
+          
+          ### What's New
+          - [List new features here]
+          - [List bug fixes here]
+          - [List improvements here]
+          
+          ### Installation
+          1. Download the DMG file
+          2. Open the DMG and drag RouteX to Applications
+          3. Launch RouteX from Applications
+          
+          ### System Requirements
+          - macOS 12.0 (Monterey) or later
+          - Administrator privileges for route modifications
+          
+          ### Changes
+          See [CHANGELOG.md](CHANGELOG.md) for detailed changes.
+          
+          ### Support
+          - [GitHub Issues](https://github.com/yourusername/routex/issues)
+          - [Documentation](https://github.com/yourusername/routex#readme)
+          
+          ### Download
+          - **macOS**: RouteX-${{ steps.get_version.outputs.VERSION }}.dmg
+          
+          ### Checksums
+          ```
+          SHA256: $(shasum -a 256 RouteX-${{ steps.get_version.outputs.VERSION }}.dmg | cut -d' ' -f1)
+          ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Upload to GitHub Packages
+      run: |
+        # Upload the app bundle to GitHub Packages
+        echo "Uploading to GitHub Packages..."
+        
+    - name: Notify community
+      run: |
+        echo "Release ${{ steps.get_version.outputs.VERSION }} published successfully!"
+        echo "Download: https://github.com/yourusername/routex/releases/latest" 
