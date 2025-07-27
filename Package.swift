@@ -37,7 +37,8 @@ let package = Package(
             dependencies: [
                 .target(name: "RouteX"),
                 .product(name: "ViewInspector", package: "ViewInspector")
-            ]
+            ],
+            path: "RouteXTests"
         ),
     ]
 ) 

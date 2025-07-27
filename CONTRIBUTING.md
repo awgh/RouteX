@@ -20,7 +20,7 @@ RouteX is committed to providing a welcoming and inclusive environment for all c
 
 ### Prerequisites
 - **macOS 12.0+** for development and testing
-- **Xcode 14.0+** with Command Line Tools
+- **Swift 5.9+** for building and testing
 - **Administrator privileges** for testing route modifications
 - **Git** for version control
 
@@ -38,6 +38,11 @@ RouteX is committed to providing a welcoming and inclusive environment for all c
 4. **Run tests** to verify your setup:
    ```bash
    ./run_tests.sh
+   ```
+5. **Alternative**: Use Swift Package Manager directly:
+   ```bash
+   swift build -c release
+   swift test
    ```
 
 ## Development Workflow

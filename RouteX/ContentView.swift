@@ -86,8 +86,7 @@ struct ContentView: View {
     }
     
     var body: some View {
-        NavigationView {
-            VStack(spacing: 0) {
+        VStack(spacing: 0) {
                 // Toolbar
                 HStack {
                     Text("Network Routes")
@@ -243,6 +242,7 @@ struct ContentView: View {
                     }
                     .tableStyle(.bordered)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .layoutPriority(1)
                 }
                 
                 // Status bar
@@ -310,7 +310,6 @@ struct ContentView: View {
                 .padding(.vertical, 8)
                 .background(Color(NSColor.controlBackgroundColor))
             }
-        }
         .sheet(isPresented: $showingAddRoute) {
             AddRouteView(routeManager: routeManager)
         }

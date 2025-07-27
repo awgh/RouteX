@@ -57,7 +57,7 @@ RouteX requires administrator privileges to modify network routing tables. This 
 
 3. **Install the built app**:
    ```bash
-   cp -r build/DerivedData/Build/Products/Release/RouteX.app /Applications/
+   cp -r build/RouteX.app /Applications/
    ```
 
 ## First Launch

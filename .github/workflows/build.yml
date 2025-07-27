@@ -38,19 +38,23 @@ jobs:
       
     - name: Build RouteX
       run: |
-        chmod +x ./build.sh
-        ./build.sh
+        swift build -c release
       timeout-minutes: 10
         
     - name: Build for release
       run: |
-        xcodebuild archive -project RouteX.xcodeproj -scheme RouteX -archivePath RouteX.xcarchive -derivedDataPath build/DerivedData
+        swift build -c release
+        mkdir -p RouteX.app/Contents/MacOS
+        cp .build/release/RouteX RouteX.app/Contents/MacOS/
+        cp RouteX/Info.plist RouteX.app/Contents/
+        cp -r RouteX/Assets.xcassets RouteX.app/Contents/Resources/
+        chmod +x RouteX.app/Contents/MacOS/RouteX
       timeout-minutes: 15
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: RouteX-${{ matrix.xcode }}
-        path: RouteX.xcarchive
+        path: RouteX.app
         
  

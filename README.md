@@ -63,7 +63,7 @@ cd routex
 ./build.sh
 ```
 
-The built application will be located at `build/DerivedData/Build/Products/Release/RouteX.app`
+The built application will be located at `build/RouteX.app`
 
 ### Running
 1. Open `RouteX.app`
@@ -115,6 +115,13 @@ The built application will be located at `build/DerivedData/Build/Products/Relea
 | `10.0.0.1` | `10.0.0.1/32` | `10.0.0.1/32` |
 
 ## Technical Details
+
+### Build System
+RouteX uses **Swift Package Manager** for building and testing:
+- **Build Command**: `swift build -c release`
+- **Test Command**: `swift test`
+- **Package Structure**: Standard Swift Package Manager layout
+- **Dependencies**: Managed through `Package.swift`
 
 ### System Integration
 RouteX integrates with macOS routing using:
@@ -169,6 +176,11 @@ For technical support, check Console.app for RouteX debug output when creating r
 - **AddRouteView**: Route creation/editing interface
 - **ContentView**: Main route list and management
 - **CustomTooltip**: Enhanced help system
+
+### Build Scripts
+- **`build.sh`**: Swift Package Manager build script with app bundle creation
+- **`run_tests.sh`**: Test runner using Swift Package Manager
+- **GitHub Actions**: Automated CI/CD with Swift Package Manager
 
 ### Design Principles
 - **Safety First**: Protect system routes from accidental modification

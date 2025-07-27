@@ -19,21 +19,16 @@ jobs:
       
     - name: Build RouteX
       run: |
-        chmod +x ./build.sh
-        ./build.sh
+        swift build -c release
         
     - name: Create app bundle
       run: |
-        # The build script should have already created the app bundle
-        # Let's verify it exists and copy it to the workspace root
-        if [ -d "build/DerivedData/Build/Products/Release/RouteX.app" ]; then
-          cp -r "build/DerivedData/Build/Products/Release/RouteX.app" .
-          echo "App bundle copied successfully"
-        else
-          echo "Error: App bundle not found at expected location"
-          ls -la build/DerivedData/Build/Products/Release/
-          exit 1
-        fi
+        mkdir -p RouteX.app/Contents/MacOS
+        cp .build/release/RouteX RouteX.app/Contents/MacOS/
+        cp RouteX/Info.plist RouteX.app/Contents/
+        cp -r RouteX/Assets.xcassets RouteX.app/Contents/Resources/
+        chmod +x RouteX.app/Contents/MacOS/RouteX
+        echo "App bundle created successfully"
         
     - name: Create DMG
       run: |
