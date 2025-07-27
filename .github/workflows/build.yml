@@ -12,7 +12,7 @@ jobs:
     
     strategy:
       matrix:
-        xcode: ['14.3', '15.0']
+        xcode: ['15.0']
     
     steps:
     - name: Checkout code
@@ -27,14 +27,25 @@ jobs:
     - name: Show Swift version
       run: swift --version
       
+    - name: Verify Xcode installation
+      run: |
+        if [ ! -d "/Applications/Xcode_${{ matrix.xcode }}.app" ]; then
+          echo "Error: Xcode ${{ matrix.xcode }} not found"
+          ls -la /Applications/Xcode*
+          exit 1
+        fi
+        echo "Xcode ${{ matrix.xcode }} found and selected"
+      
     - name: Build RouteX
       run: |
         chmod +x ./build.sh
         ./build.sh
+      timeout-minutes: 10
         
     - name: Build for release
       run: |
         xcodebuild archive -project RouteX.xcodeproj -scheme RouteX -archivePath RouteX.xcarchive -derivedDataPath build/DerivedData
+      timeout-minutes: 15
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
