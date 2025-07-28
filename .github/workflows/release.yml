@@ -58,6 +58,7 @@ jobs:
         generate_release_notes: true
         draft: false
         prerelease: false
+        update_existing: true
         body: |
           ## RouteX ${{ steps.get_version.outputs.VERSION }}
           
