@@ -54,6 +54,7 @@ This app gives you a nice, clickable interface to manage your network routes wit
 
 ### Requirements
 - **macOS 12.0 or later**
+- **Apple Silicon (M1/M2/M3) or Intel Mac** - Universal binary supports both architectures
 - **Administrator privileges** (required for route modification)
 
 ### Build from Source
@@ -63,7 +64,7 @@ cd routex
 ./build.sh
 ```
 
-The built application will be located at `build/RouteX.app`
+The built application will be located at `build/RouteX.app` and includes a **universal binary** that works on both Apple Silicon and Intel Macs.
 
 ### Running
 1. Open `RouteX.app`
@@ -122,6 +123,7 @@ RouteX uses **Swift Package Manager** for building and testing:
 - **Test Command**: `swift test`
 - **Package Structure**: Standard Swift Package Manager layout
 - **Dependencies**: Managed through `Package.swift`
+- **Universal Binary**: Built for both Apple Silicon (ARM64) and Intel (x86_64) architectures
 
 ### System Integration
 RouteX integrates with macOS routing using:

@@ -196,33 +196,36 @@ final class RouteModelTests: XCTestCase {
 
     func testParseIPAddressRightPadding() throws {
         // Test network route parsing (right-padding)
-        XCTAssertEqual(NetworkRoute().parseIPAddress(from: "192.168"), "192.168.0.0", "Network shorthand should be right-padded")
-        XCTAssertEqual(NetworkRoute().parseIPAddress(from: "10.1.2"), "10.1.2.0", "Network shorthand should be right-padded")
-        XCTAssertEqual(NetworkRoute().parseIPAddress(from: "172.16"), "172.16.0.0", "Network shorthand should be right-padded")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "192.168"), "192.168.0.0", "Network shorthand should be right-padded")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "10.1.2"), "10.1.2.0", "Network shorthand should be right-padded")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "172.16"), "172.16.0.0", "Network shorthand should be right-padded")
     }
 
     func testParseHostAddressLeftPadding() throws {
         // Test host route parsing (left-padding)
-        XCTAssertEqual(NetworkRoute().parseHostAddressLeftPad("128.32"), "128.0.0.32", "Host shorthand should be left-padded")
-        XCTAssertEqual(NetworkRoute().parseHostAddressLeftPad("128.32.130"), "128.32.0.130", "Host shorthand should be left-padded")
-        XCTAssertEqual(NetworkRoute().parseHostAddressLeftPad("192.168.1"), "192.168.0.1", "Host shorthand should be left-padded")
+        let route = NetworkRoute()
+        XCTAssertEqual(route.parseHostAddressLeftPad("128.32"), "128.0.0.32", "Host shorthand should be left-padded")
+        XCTAssertEqual(route.parseHostAddressLeftPad("128.32.130"), "128.32.0.130", "Host shorthand should be left-padded")
+        XCTAssertEqual(route.parseHostAddressLeftPad("192.168.1"), "192.168.0.1", "Host shorthand should be left-padded")
     }
 
     func testParseFullIPAddresses() throws {
         // Test full IP addresses (should remain unchanged)
-        XCTAssertEqual(NetworkRoute().parseIPAddress(from: "192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
-        XCTAssertEqual(NetworkRoute().parseHostAddressLeftPad("192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
-        XCTAssertEqual(NetworkRoute().parseIPAddress(from: "10.0.0.1"), "10.0.0.1", "Full IP should remain unchanged")
+        let route = NetworkRoute()
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
+        XCTAssertEqual(route.parseHostAddressLeftPad("192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "10.0.0.1"), "10.0.0.1", "Full IP should remain unchanged")
     }
 
     func testParseInvalidIPAddresses() throws {
         // Test invalid IP addresses
-        XCTAssertNil(NetworkRoute().parseIPAddress(from: "notanip"), "Invalid IP should return nil")
-        XCTAssertNil(NetworkRoute().parseIPAddress(from: "256.256.256.256"), "Invalid IP should return nil")
-        XCTAssertNil(NetworkRoute().parseIPAddress(from: "192.168.1"), "Incomplete IP should return nil")
+        let route = NetworkRoute()
+        XCTAssertNil(NetworkRoute.parseIPAddress(from: "notanip"), "Invalid IP should return nil")
+        XCTAssertNil(NetworkRoute.parseIPAddress(from: "256.256.256.256"), "Invalid IP should return nil")
+        XCTAssertNil(NetworkRoute.parseIPAddress(from: "192.168.1"), "Incomplete IP should return nil")
 
-        XCTAssertNil(NetworkRoute().parseHostAddressLeftPad("notanip"), "Invalid IP should return nil")
-        XCTAssertNil(NetworkRoute().parseHostAddressLeftPad("256.256.256.256"), "Invalid IP should return nil")
+        XCTAssertNil(route.parseHostAddressLeftPad("notanip"), "Invalid IP should return nil")
+        XCTAssertNil(route.parseHostAddressLeftPad("256.256.256.256"), "Invalid IP should return nil")
     }
 
     // MARK: - Route Flags Tests

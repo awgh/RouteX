@@ -308,16 +308,17 @@ final class RouteManagerTests: XCTestCase {
 
     func testIPAddressParsing() throws {
         // Test network route parsing (right-padding)
-        XCTAssertEqual(routeManager.parseIPAddress(from: "192.168"), "192.168.0.0", "Network shorthand should be right-padded")
-        XCTAssertEqual(routeManager.parseIPAddress(from: "10.1.2"), "10.1.2.0", "Network shorthand should be right-padded")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "192.168"), "192.168.0.0", "Network shorthand should be right-padded")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "10.1.2"), "10.1.2.0", "Network shorthand should be right-padded")
 
         // Test host route parsing (left-padding)
-        XCTAssertEqual(routeManager.parseHostAddressLeftPad("128.32"), "128.0.0.32", "Host shorthand should be left-padded")
-        XCTAssertEqual(routeManager.parseHostAddressLeftPad("128.32.130"), "128.32.0.130", "Host shorthand should be left-padded")
+        let route = NetworkRoute()
+        XCTAssertEqual(route.parseHostAddressLeftPad("128.32"), "128.0.0.32", "Host shorthand should be left-padded")
+        XCTAssertEqual(route.parseHostAddressLeftPad("128.32.130"), "128.32.0.130", "Host shorthand should be left-padded")
 
         // Test full IP addresses
-        XCTAssertEqual(routeManager.parseIPAddress(from: "192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
-        XCTAssertEqual(routeManager.parseHostAddressLeftPad("192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
+        XCTAssertEqual(NetworkRoute.parseIPAddress(from: "192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
+        XCTAssertEqual(route.parseHostAddressLeftPad("192.168.1.1"), "192.168.1.1", "Full IP should remain unchanged")
     }
 
     // MARK: - Route Destination Normalization Tests

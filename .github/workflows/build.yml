@@ -36,20 +36,54 @@ jobs:
         fi
         echo "Xcode ${{ matrix.xcode }} found and selected"
       
-    - name: Build RouteX
+    - name: Build RouteX (Universal Binary)
       run: |
-        swift build -c release
-      timeout-minutes: 10
+        # Build for ARM64 (Apple Silicon)
+        echo "Building for ARM64 (Apple Silicon)..."
+        swift build -c release --triple arm64-apple-macosx12.0
+        ARM64_EXECUTABLE=".build/arm64-apple-macosx/release/RouteX"
+        
+        # Build for x86_64 (Intel)
+        echo "Building for x86_64 (Intel)..."
+        swift build -c release --triple x86_64-apple-macosx12.0
+        X86_64_EXECUTABLE=".build/x86_64-apple-macosx/release/RouteX"
+        
+        # Create universal binary
+        echo "Creating universal binary..."
+        UNIVERSAL_EXECUTABLE=".build/release/RouteX"
+        mkdir -p "$(dirname "$UNIVERSAL_EXECUTABLE")"
+        
+        # Use lipo to create universal binary
+        lipo -create "$ARM64_EXECUTABLE" "$X86_64_EXECUTABLE" -output "$UNIVERSAL_EXECUTABLE"
+        echo "Universal binary created successfully"
+        
+        # Verify universal binary
+        echo "Verifying universal binary architecture..."
+        file .build/release/RouteX
+        lipo -info .build/release/RouteX
+      timeout-minutes: 15
         
     - name: Build for release
       run: |
-        swift build -c release
         mkdir -p RouteX.app/Contents/MacOS
         cp .build/release/RouteX RouteX.app/Contents/MacOS/
         cp RouteX/Info.plist RouteX.app/Contents/
+        mkdir -p RouteX.app/Contents/Resources
         cp -r RouteX/Assets.xcassets RouteX.app/Contents/Resources/
+        
+        # Create app icon
+        ICONSET_PATH="RouteX.app/Contents/Resources/AppIcon.iconset"
+        mkdir -p "$ICONSET_PATH"
+        cp RouteX.app/Contents/Resources/Assets.xcassets/AppIcon.appiconset/icon_*.png "$ICONSET_PATH/"
+        iconutil -c icns "$ICONSET_PATH" -o RouteX.app/Contents/Resources/AppIcon.icns
+        rm -rf "$ICONSET_PATH"
+        
         chmod +x RouteX.app/Contents/MacOS/RouteX
-      timeout-minutes: 15
+        
+        # Verify the app bundle
+        echo "App bundle structure:"
+        find RouteX.app -type f
+      timeout-minutes: 10
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4

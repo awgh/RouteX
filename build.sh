@@ -21,12 +21,35 @@ swift --version
 BUILD_DIR="build"
 mkdir -p "$BUILD_DIR"
 
-# Build the project using Swift Package Manager
-echo "Building with Swift Package Manager..."
-swift build -c release
+# Build the project using Swift Package Manager for both architectures
+echo "Building universal binary for Apple Silicon and Intel Macs..."
+
+# Build for ARM64 (Apple Silicon)
+echo "Building for ARM64 (Apple Silicon)..."
+swift build -c release --triple arm64-apple-macosx12.0
+ARM64_EXECUTABLE=".build/arm64-apple-macosx/release/RouteX"
+
+# Build for x86_64 (Intel)
+echo "Building for x86_64 (Intel)..."
+swift build -c release --triple x86_64-apple-macosx12.0
+X86_64_EXECUTABLE=".build/x86_64-apple-macosx/release/RouteX"
+
+# Create universal binary
+echo "Creating universal binary..."
+UNIVERSAL_EXECUTABLE=".build/release/RouteX"
+mkdir -p "$(dirname "$UNIVERSAL_EXECUTABLE")"
+
+# Use lipo to create universal binary
+if command -v lipo &> /dev/null; then
+    lipo -create "$ARM64_EXECUTABLE" "$X86_64_EXECUTABLE" -output "$UNIVERSAL_EXECUTABLE"
+    echo "Universal binary created successfully"
+else
+    echo "Warning: lipo not found, using ARM64 binary only"
+    cp "$ARM64_EXECUTABLE" "$UNIVERSAL_EXECUTABLE"
+fi
 
 # Define the executable path
-EXECUTABLE_PATH=".build/release/RouteX"
+EXECUTABLE_PATH="$UNIVERSAL_EXECUTABLE"
 
 # Create app bundle structure
 APP_PATH="$BUILD_DIR/RouteX.app"

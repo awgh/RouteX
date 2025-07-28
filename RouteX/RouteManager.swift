@@ -578,7 +578,7 @@ return .invalid
 }
 
 /// Validate route configuration before executing commands
-private func validateRouteForCommand(_ route: NetworkRoute, command: String) -> Bool {
+    internal func validateRouteForCommand(_ route: NetworkRoute, command: String) -> Bool {
 // Basic validation for all commands
 if route.destination.isEmpty {
 return false
@@ -769,21 +769,21 @@ if trimmed.isEmpty { index += 1; continue }
 if trimmed.hasPrefix("flags:") {
 let flagsContent = trimmed.replacingOccurrences(of: "flags:", with: "").trimmingCharacters(in: .whitespaces)
 flags = parseSystemFlagsToRouteXFormat(flagsContent)
-i += 1
+index += 1
 continue
 }
 
 // Parse gateway line: "gateway: 192.168.1.1"
 if trimmed.hasPrefix("gateway:") {
 gateway = trimmed.replacingOccurrences(of: "gateway:", with: "").trimmingCharacters(in: .whitespaces)
-i += 1
+index += 1
 continue
 }
 
 // Parse interface line: "interface: en0"
 if trimmed.hasPrefix("interface:") {
 interface = trimmed.replacingOccurrences(of: "interface:", with: "").trimmingCharacters(in: .whitespaces)
-i += 1
+index += 1
 continue
 }
 

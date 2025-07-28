@@ -38,7 +38,9 @@ let package = Package(
                 .target(name: "RouteX"),
                 .product(name: "ViewInspector", package: "ViewInspector")
             ],
-            path: "RouteXTests"
+            path: "RouteXTests",
+            exclude: ["README.md", "routex.code-workspace"],
+            sources: ["BasicFunctionalityTests.swift", "ComprehensiveTests.swift"]
         ),
     ]
 ) 

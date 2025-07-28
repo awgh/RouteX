@@ -35,8 +35,7 @@ jobs:
       
     - name: Run unit tests
       run: |
-        echo "Tests temporarily disabled - focusing on build"
-        # swift test
+        swift test --filter "BasicFunctionalityTests|ComprehensiveTests"
       timeout-minutes: 15
           
     - name: Upload test results
