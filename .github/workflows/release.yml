@@ -48,21 +48,22 @@ jobs:
         # Copy RouteX.zip from build directory to root for release upload
         cp build/RouteX.zip RouteX-${{ steps.get_version.outputs.VERSION }}.zip
         
-    - name: Check if release exists
+    - name: Delete existing release if it exists
       if: startsWith(github.ref, 'refs/tags/')
-      id: check_release
       run: |
-        # Check if a release already exists for this tag
-        if gh release view ${{ steps.get_version.outputs.VERSION }} --json url 2>/dev/null; then
-          echo "exists=true" >> $GITHUB_OUTPUT
-          echo "Release already exists for tag ${{ steps.get_version.outputs.VERSION }}"
+        echo "Checking for existing release for tag: ${{ steps.get_version.outputs.VERSION }}"
+        
+        # Try to delete existing release (this will fail silently if no release exists)
+        if gh release view ${{ steps.get_version.outputs.VERSION }} >/dev/null 2>&1; then
+          echo "Found existing release, deleting it..."
+          gh release delete ${{ steps.get_version.outputs.VERSION }} --yes
+          echo "Existing release deleted"
         else
-          echo "exists=false" >> $GITHUB_OUTPUT
-          echo "No existing release found for tag ${{ steps.get_version.outputs.VERSION }}"
+          echo "No existing release found"
         fi
         
     - name: Create Release (Tagged Releases)
-      if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.exists == 'false'
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v1
       with:
         files: |
@@ -106,21 +107,6 @@ jobs:
           DMG SHA256: $(shasum -a 256 RouteX-${{ steps.get_version.outputs.VERSION }}.dmg | cut -d' ' -f1)
           ZIP SHA256: $(shasum -a 256 RouteX-${{ steps.get_version.outputs.VERSION }}.zip | cut -d' ' -f1)
           ```
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
-    - name: Upload assets to existing release
-      if: startsWith(github.ref, 'refs/tags/') && steps.check_release.outputs.exists == 'true'
-      run: |
-        echo "Uploading assets to existing release..."
-        
-        # Upload DMG file
-        gh release upload ${{ steps.get_version.outputs.VERSION }} RouteX-${{ steps.get_version.outputs.VERSION }}.dmg
-        
-        # Upload ZIP file
-        gh release upload ${{ steps.get_version.outputs.VERSION }} RouteX-${{ steps.get_version.outputs.VERSION }}.zip
-        
-        echo "Assets uploaded successfully to existing release"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
