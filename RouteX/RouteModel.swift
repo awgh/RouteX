@@ -347,16 +347,16 @@ struct NetworkRoute: Identifiable, Codable {
         return address.withCString { inet_pton(AF_INET6, $0, &ipv6addr) } == 1
     }
 
-    private static func isValidIPAddress(_ ip: String) -> Bool {
+    private static func isValidIPAddress(_ ipAddress: String) -> Bool {
         // Check IPv4
         var ipv4addr = in_addr()
-        if ip.withCString({ inet_pton(AF_INET, $0, &ipv4addr) }) == 1 {
+        if ipAddress.withCString({ inet_pton(AF_INET, $0, &ipv4addr) }) == 1 {
             return true
         }
 
         // Check IPv6
         var ipv6addr = in6_addr()
-        if ip.withCString({ inet_pton(AF_INET6, $0, &ipv6addr) }) == 1 {
+        if ipAddress.withCString({ inet_pton(AF_INET6, $0, &ipv6addr) }) == 1 {
             return true
         }
 
@@ -419,13 +419,13 @@ struct NetworkRoute: Identifiable, Codable {
     }
 
     /// Checks if this route contains a specific IP address
-    func containsIP(_ ip: String) -> Bool {
+    func containsIP(_ ipAddress: String) -> Bool {
         guard let routeCIDR = normalizedCIDR,
-              let ipAddress = NetworkRoute.parseIPAddress(from: ip) else {
+              let parsedIPAddress = NetworkRoute.parseIPAddress(from: ipAddress) else {
             return false
         }
 
-        return routeCIDR.contains(ipAddress)
+        return routeCIDR.contains(parsedIPAddress)
     }
 
     /// Returns a human-readable gateway display value
@@ -481,7 +481,7 @@ struct NetworkRoute: Identifiable, Codable {
     /// Returns a description of the gateway type for tooltips and debugging
     var gatewayTypeDescription: String {
         // Check if gateway is a valid IP address
-        if let _ = NetworkRoute.parseIPAddress(from: gateway) {
+        if NetworkRoute.parseIPAddress(from: gateway) != nil {
             return "IP Gateway: \(gateway)"
         }
 
@@ -850,8 +850,8 @@ struct CIDRInfo {
     }
 
     /// Checks if this CIDR contains a specific IP address
-    func contains(_ ip: String) -> Bool {
-        guard let ipInt = parseIPToInt(ip),
+    func contains(_ ipAddress: String) -> Bool {
+        guard let ipInt = parseIPToInt(ipAddress),
               let networkInt = parseIPToInt(networkAddress) else {
             return false
         }
@@ -882,8 +882,8 @@ struct CIDRInfo {
 
     // MARK: - Helper Functions
 
-    private func parseIPToInt(_ ip: String) -> UInt32? {
-        let components = ip.components(separatedBy: ".")
+    private func parseIPToInt(_ ipAddress: String) -> UInt32? {
+        let components = ipAddress.components(separatedBy: ".")
         guard components.count == 4 else { return nil }
 
         var result: UInt32 = 0

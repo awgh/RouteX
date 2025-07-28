@@ -58,8 +58,8 @@ final class ComprehensiveTests: XCTestCase {
     
     func testGatewayTypeDetection() {
         // IP address gateway
-        XCTAssertEqual(routeManager.gatewayType("192.168.1.1"), .ip, "IP address should be detected as IP gateway")
-        XCTAssertEqual(routeManager.gatewayType("10.0.0.1"), .ip, "IP address should be detected as IP gateway")
+        XCTAssertEqual(routeManager.gatewayType("192.168.1.1"), .ipAddress, "IP address should be detected as IP gateway")
+        XCTAssertEqual(routeManager.gatewayType("10.0.0.1"), .ipAddress, "IP address should be detected as IP gateway")
         
         // Interface gateway
         XCTAssertEqual(routeManager.gatewayType("en0"), .iface, "Interface should be detected as interface gateway")
@@ -333,10 +333,10 @@ final class ComprehensiveTests: XCTestCase {
     func testNetworkRouteCreationPerformance() {
         measure {
             // Test NetworkRoute creation performance
-            for i in 0..<100 {
+            for index in 0..<100 {
                 _ = NetworkRoute(
-                    destination: "192.168.\(i).0/24",
-                    gateway: "192.168.\(i).1",
+                    destination: "192.168.\(index).0/24",
+                    gateway: "192.168.\(index).1",
                     interface: "en0",
                     flags: "S",
                     expire: ""

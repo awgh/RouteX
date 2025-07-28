@@ -282,8 +282,8 @@ final class RouteManagerTests: XCTestCase {
 
     func testGatewayTypeDetection() throws {
         // Test IP address detection
-        XCTAssertEqual(routeManager.gatewayType("192.168.1.1"), .ip, "Valid IP should be detected as IP type")
-        XCTAssertEqual(routeManager.gatewayType("10.0.0.1"), .ip, "Valid IP should be detected as IP type")
+        XCTAssertEqual(routeManager.gatewayType("192.168.1.1"), .ipAddress, "Valid IP should be detected as IP type")
+        XCTAssertEqual(routeManager.gatewayType("10.0.0.1"), .ipAddress, "Valid IP should be detected as IP type")
 
         // Test interface detection
         XCTAssertEqual(routeManager.gatewayType("en0"), .iface, "Interface name should be detected as interface type")

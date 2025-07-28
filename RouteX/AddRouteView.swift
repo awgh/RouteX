@@ -59,12 +59,12 @@ struct AddRouteView: View {
 
     // Add a new enum for gateway type
     enum GatewayInputType: String, CaseIterable, Identifiable {
-        case ip = "IP Address"
+        case ipAddress = "IP Address"
         case iface = "Interface"
         case mac = "MAC Address"
         var id: String { self.rawValue }
     }
-    @State private var gatewayType: GatewayInputType = .ip
+    @State private var gatewayType: GatewayInputType = .ipAddress
 
     // Computed properties
     private var isEditing: Bool {
@@ -214,7 +214,7 @@ struct AddRouteView: View {
                                 .pickerStyle(SegmentedPickerStyle())
                                 .padding(.bottom, 4)
 
-                                TextField(gatewayType == .ip ? "e.g., 192.168.1.1 or 2001:db8::1" : (gatewayType == .iface ? "e.g., en0" : "e.g., 00:11:22:33:44:55"), text: $gateway)
+                                TextField(gatewayType == .ipAddress ? "e.g., 192.168.1.1 or 2001:db8::1" : (gatewayType == .iface ? "e.g., en0" : "e.g., 00:11:22:33:44:55"), text: $gateway)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .disabled(gatewayType == .iface)
                                     .onChange(of: gatewayType) { newType in
@@ -223,7 +223,7 @@ struct AddRouteView: View {
                                         }
                                     }
 
-                                Text(gatewayType == .ip ? "IPv4 or IPv6 address" : (gatewayType == .iface ? "Interface name (e.g., en0)" : "MAC address (e.g., 00:11:22:33:44:55)"))
+                                Text(gatewayType == .ipAddress ? "IPv4 or IPv6 address" : (gatewayType == .iface ? "Interface name (e.g., en0)" : "MAC address (e.g., 00:11:22:33:44:55)"))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
 
@@ -235,7 +235,7 @@ struct AddRouteView: View {
                             }
 
                             // Interface (conditional)
-                            if gatewayType == .ip || gatewayType == .mac {
+                            if gatewayType == .ipAddress || gatewayType == .mac {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Interface (Optional)")
                                         .font(.subheadline)
@@ -383,7 +383,7 @@ struct AddRouteView: View {
 
         if !gateway.isEmpty {
             switch gatewayType {
-            case .ip:
+            case .ipAddress:
                 if !routeManager.isValidIPAddress(gateway) {
                     // Check if it's an invalid IPv6 special address
                     let sanitized = routeManager.sanitizeIPv6Address(gateway)
@@ -422,7 +422,7 @@ struct AddRouteView: View {
         // Detect gateway type and set value/type accordingly (support both IPv4 and IPv6)
         if routeManager.isValidIPAddress(route.gateway) {
             gateway = route.gateway
-            gatewayType = .ip
+            gatewayType = .ipAddress
         } else if routeManager.isValidInterfaceName(route.gateway) {
             gateway = route.gateway
             gatewayType = .iface
@@ -431,7 +431,7 @@ struct AddRouteView: View {
             gatewayType = .mac
         } else {
             gateway = route.gateway
-            gatewayType = .ip // Default fallback
+            gatewayType = .ipAddress // Default fallback
         }
 
         interface = route.interface
@@ -554,7 +554,7 @@ struct AddRouteView: View {
                         } else {
                             // AddRouteView error: \(error ?? "unknown")
                             // If adding the updated route failed, try to restore the original
-                            self.routeManager.addRoute(originalRoute) { restoreSuccess, restoreError in
+                            self.routeManager.addRoute(originalRoute) { restoreSuccess, _ in
                                 if !restoreSuccess {
                                     self.errorMessage = "Failed to update route and restore original: \(error ?? "Unknown error")"
                                 } else {

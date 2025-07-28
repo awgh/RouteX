@@ -264,7 +264,7 @@ case .iface:
 routeArgs.append("-interface")
 case .mac:
 routeArgs.append("-link")
-case .ip, .special:
+case .ipAddress, .special:
 // No additional modifier needed for IP gateways
 break
 case .invalid:
@@ -392,28 +392,28 @@ return []
 }
 }
 
-func validateIPAddress(_ ip: String) -> Bool {
-let components = ip.components(separatedBy: ".")
-guard components.count == 4 else { return false }
+func validateIPAddress(_ ipAddress: String) -> Bool {
+    let components = ipAddress.components(separatedBy: ".")
+    guard components.count == 4 else { return false }
 
-for component in components {
-guard let number = Int(component), number >= 0 && number <= 255 else {
-return false
-}
-}
+    for component in components {
+        guard let number = Int(component), number >= 0 && number <= 255 else {
+            return false
+        }
+    }
 
-return true
+    return true
 }
 
 /// Validates both IPv4 and IPv6 addresses
-func isValidIPAddress(_ ip: String) -> Bool {
-// Check IPv4 first (simple validation)
-if validateIPAddress(ip) {
-return true
-}
+func isValidIPAddress(_ ipAddress: String) -> Bool {
+    // Check IPv4 first (simple validation)
+    if validateIPAddress(ipAddress) {
+        return true
+    }
 
-// For IPv6, use routing-specific validation
-return isValidIPv6ForRouting(ip)
+    // For IPv6, use routing-specific validation
+    return isValidIPv6ForRouting(ipAddress)
 }
 
 /// Sanitizes IPv6 addresses for route command by removing zone identifiers and prefix lengths
@@ -563,18 +563,18 @@ return false
 return true
 }
 
-func isSpecialGateway(_ gw: String) -> Bool {
-return gw == "*" || gw.hasPrefix("link#")
+func isSpecialGateway(_ gateway: String) -> Bool {
+    return gateway == "*" || gateway.hasPrefix("link#")
 }
 
 /// Determine the gateway type for command construction
-enum GatewayType { case ip, iface, mac, special, invalid }
-func gatewayType(_ gw: String) -> GatewayType {
-if isValidIPAddress(gw) { return .ip }
-if isValidInterfaceName(gw) { return .iface }
-if isValidMACAddress(gw) { return .mac }
-if isSpecialGateway(gw) { return .special }
-return .invalid
+enum GatewayType { case ipAddress, iface, mac, special, invalid }
+func gatewayType(_ gateway: String) -> GatewayType {
+    if isValidIPAddress(gateway) { return .ipAddress }
+    if isValidInterfaceName(gateway) { return .iface }
+    if isValidMACAddress(gateway) { return .mac }
+    if isSpecialGateway(gateway) { return .special }
+    return .invalid
 }
 
 /// Validate route configuration before executing commands
@@ -630,7 +630,7 @@ case .iface:
 routeArgs.append("-interface")
 case .mac:
 routeArgs.append("-link")
-case .ip, .special:
+case .ipAddress, .special:
 // No additional modifier needed for IP gateways
 break
 case .invalid:
