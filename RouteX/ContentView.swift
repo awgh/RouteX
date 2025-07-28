@@ -149,7 +149,7 @@ struct ContentView: View {
 
                     TextField("Search routes (IP, CIDR, shorthand like '127', '192.168', gateway, interface)...", text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
-                        .help("TEST TOOLTIP - Search routes by destination, gateway, or interface. Supports shorthand notation (e.g., '192.168' for 192.168.0.0/16) and CIDR notation.")
+                        .help("Search routes by destination, gateway, or interface. Supports shorthand notation (e.g., '192.168' for 192.168.0.0/16) and CIDR notation.")
                         .onSubmit {
                             // Search submitted: \(searchText)
                         }

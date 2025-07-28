@@ -106,6 +106,22 @@ chmod +x "$MACOS_PATH/RouteX"
 echo "Build completed successfully!"
 echo "The app is located in: $APP_PATH"
 
+# Create distribution zip file
+echo "Creating distribution package..."
+DIST_DIR="$BUILD_DIR/dist"
+mkdir -p "$DIST_DIR"
+
+# Copy the app bundle to the distribution directory
+cp -r "$APP_PATH" "$DIST_DIR/"
+
+# Create zip file from the distribution directory
+cd "$DIST_DIR"
+zip -r "../RouteX.zip" "RouteX.app"
+cd - > /dev/null
+
+echo "Distribution package created: $BUILD_DIR/RouteX.zip"
+echo "This zip file will extract to a folder containing RouteX.app"
+
 # Optional: Open the app
 read -p "Would you like to open the app now? (y/n): " -n 1 -r
 echo
