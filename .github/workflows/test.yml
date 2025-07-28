@@ -21,9 +21,6 @@ jobs:
     - name: Select Xcode
       run: sudo xcode-select -switch /Applications/Xcode_${{ matrix.xcode }}.app
       
-    - name: Show Xcode version
-      run: xcodebuild -version
-      
     - name: Show Swift version
       run: swift --version
       
@@ -35,9 +32,6 @@ jobs:
           exit 1
         fi
         echo "Xcode ${{ matrix.xcode }} found and selected"
-      
-    - name: List available schemes
-      run: xcodebuild -list -project RouteX.xcodeproj
       
     - name: Run unit tests
       run: |

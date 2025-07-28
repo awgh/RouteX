@@ -21,7 +21,7 @@ import SwiftUI
 struct CustomTooltip: ViewModifier {
     let text: String
     @State private var isHovered = false
-    
+
     func body(content: Content) -> some View {
         content
             .onHover { hovering in
@@ -38,7 +38,7 @@ struct CustomTooltip: ViewModifier {
                                 .background(Color.black.opacity(0.8))
                                 .cornerRadius(6)
                                 .offset(y: -40)
-                            
+
                             Spacer()
                         }
                         .transition(.opacity)
@@ -53,4 +53,4 @@ extension View {
     func customTooltip(_ text: String) -> some View {
         modifier(CustomTooltip(text: text))
     }
-} 
+}

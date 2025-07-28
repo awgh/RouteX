@@ -43,22 +43,22 @@ struct RouteXApp: App {
                     )
                 }
             }
-            
+
             CommandGroup(after: .appInfo) {
                 Divider()
-                
+
                 Button("RouteX on GitHub") {
                     if let url = URL(string: "https://github.com/awgh/RouteX") {
                         NSWorkspace.shared.open(url)
                     }
                 }
-                
+
                 Button("Report an Issue") {
                     if let url = URL(string: "https://github.com/awgh/RouteX/issues") {
                         NSWorkspace.shared.open(url)
                     }
                 }
-                
+
                 Button("Contact Developer") {
                     if let url = URL(string: "mailto:awgh@awgh.org") {
                         NSWorkspace.shared.open(url)
@@ -67,4 +67,4 @@ struct RouteXApp: App {
             }
         }
     }
-} 
+}

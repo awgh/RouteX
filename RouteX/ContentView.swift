@@ -25,7 +25,7 @@ struct ContentView: View {
     @State private var showingDeleteAlert = false
     @State private var searchText = ""
     @State private var routeToEdit: NetworkRoute?
-    
+
     var filteredRoutes: [NetworkRoute] {
         if searchText.isEmpty {
             return routeManager.routes.sorted { $0.specificity > $1.specificity }
@@ -33,14 +33,14 @@ struct ContentView: View {
             let matchingRoutes = routeManager.routes.filter { route in
                 route.matches(searchTerm: searchText)
             }
-            
+
             // If no routes match and we have a search term, include default routes
             var finalRoutes = matchingRoutes
             if matchingRoutes.isEmpty && !searchText.isEmpty {
                 let defaultRoutes = routeManager.routes.filter { $0.isDefaultRoute }
                 finalRoutes = defaultRoutes
             }
-            
+
             // Sort by specificity (most specific first), then by destination
             return finalRoutes.sorted { route1, route2 in
                 if route1.specificity != route2.specificity {
@@ -51,40 +51,40 @@ struct ContentView: View {
             }
         }
     }
-    
+
     var selectedRoute: NetworkRoute? {
         guard let selectedID = selectedRouteID else { return nil }
         return filteredRoutes.first(where: { $0.id == selectedID })
     }
-    
+
     var isSelectedRouteEditable: Bool {
         return selectedRoute?.isEditable ?? false
     }
-    
+
     var selectedRouteEditHelpText: String {
         guard let route = selectedRoute else {
             return "Select a route to edit"
         }
-        
+
         if route.isEditable {
             return "Edit the selected route (administrator privileges required)"
         } else {
             return "This route is system-managed and cannot be edited. System routes with flags C/W/I are automatically managed by macOS."
         }
     }
-    
+
     var selectedRouteDeleteHelpText: String {
         guard let route = selectedRoute else {
             return "Select a route to delete"
         }
-        
+
         if route.isEditable {
             return "Delete the selected route (administrator privileges required)"
         } else {
             return "This route is system-managed and cannot be deleted. System routes with flags C/W/I are automatically managed by macOS."
         }
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
                 // Toolbar
@@ -93,9 +93,9 @@ struct ContentView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .help("RouteX - Professional Network Route Manager")
-                    
+
                     Spacer()
-                    
+
                     HStack(spacing: 12) {
                         Button(action: {
                             routeManager.refreshRoutes()
@@ -105,7 +105,7 @@ struct ContentView: View {
                         }
                         .disabled(routeManager.isLoading)
                         .help("Refresh the route table to show current network routes")
-                        
+
                         Button(action: {
                             showingAddRoute = true
                         }) {
@@ -113,7 +113,7 @@ struct ContentView: View {
                             Text("Add Route")
                         }
                         .help("Add a new static route to the routing table")
-                        
+
                         Button(action: {
                             if let selectedID = selectedRouteID,
                                let route = filteredRoutes.first(where: { $0.id == selectedID }) {
@@ -125,7 +125,7 @@ struct ContentView: View {
                         }
                         .disabled(selectedRouteID == nil || !isSelectedRouteEditable)
                         .help(selectedRouteEditHelpText)
-                        
+
                         Button(action: {
                             if let selectedID = selectedRouteID,
                                let route = filteredRoutes.first(where: { $0.id == selectedID }) {
@@ -141,12 +141,12 @@ struct ContentView: View {
                 }
                 .padding()
                 .background(Color(NSColor.controlBackgroundColor))
-                
+
                 // Search bar
                 HStack {
                     Image(systemName: "magnifyingglass")
                         .foregroundColor(.secondary)
-                    
+
                     TextField("Search routes (IP, CIDR, shorthand like '127', '192.168', gateway, interface)...", text: $searchText)
                         .textFieldStyle(PlainTextFieldStyle())
                         .help("TEST TOOLTIP - Search routes by destination, gateway, or interface. Supports shorthand notation (e.g., '192.168' for 192.168.0.0/16) and CIDR notation.")
@@ -157,7 +157,7 @@ struct ContentView: View {
                 .padding(.horizontal)
                 .padding(.vertical, 8)
                 .background(Color(NSColor.controlBackgroundColor))
-                
+
                 // Routes table
                 if routeManager.isLoading {
                     VStack {
@@ -188,7 +188,7 @@ struct ContentView: View {
                             HStack(spacing: 4) {
                                 Text(route.destination)
                                     .foregroundColor(route.isEditable ? .primary : .secondary)
-                                
+
                                 // Show phantom route indicator
                                 if route.flags.contains("b") || route.flags.contains("R") {
                                     Image(systemName: "eye.slash.fill")
@@ -196,7 +196,7 @@ struct ContentView: View {
                                         .font(.caption2)
                                         .help("Phantom route: This route exists but doesn't appear in standard route listings")
                                 }
-                                
+
                                 // Show non-editable route indicator
                                 if !route.isEditable {
                                     Image(systemName: "lock.fill")
@@ -207,7 +207,7 @@ struct ContentView: View {
                             }
                         }
                         .width(min: 120, ideal: 180)
-                        
+
                         TableColumn("Gateway") { route in
                             if route.displayGateway.isEmpty {
                                 Text("—")
@@ -220,20 +220,20 @@ struct ContentView: View {
                             }
                         }
                         .width(min: 120, ideal: 150)
-                        
+
                         TableColumn("Interface") { route in
                             Text(route.interface)
                                 .foregroundColor(route.isEditable ? .primary : .secondary)
                         }
                         .width(min: 100, ideal: 120)
-                        
+
                         TableColumn("Flags") { route in
                             Text(route.flags)
                                 .font(.system(.caption, design: .monospaced))
                                 .foregroundColor(route.isEditable ? .primary : .secondary)
                         }
                         .width(min: 80, ideal: 100)
-                        
+
                         TableColumn("Expire") { route in
                             Text(route.expire)
                                 .foregroundColor(route.isEditable ? .primary : .secondary)
@@ -244,7 +244,7 @@ struct ContentView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .layoutPriority(1)
                 }
-                
+
                 // Status bar
                 HStack {
                     if let error = routeManager.errorMessage {
@@ -255,17 +255,17 @@ struct ContentView: View {
                         VStack(alignment: .leading, spacing: 2) {
                             let editableCount = filteredRoutes.filter { $0.isEditable }.count
                             let systemCount = filteredRoutes.count - editableCount
-                            
+
                             HStack(spacing: 6) {
                                 Text("\(filteredRoutes.count) route\(filteredRoutes.count == 1 ? "" : "s")")
                                     .foregroundColor(.secondary)
                                     .font(.caption)
-                                
+
                                 if systemCount > 0 {
                                     Text("(\(editableCount) editable,")
                                         .foregroundColor(.secondary)
                                         .font(.caption)
-                                    
+
                                     HStack(spacing: 2) {
                                         Image(systemName: "lock.fill")
                                             .font(.caption2)
@@ -277,7 +277,7 @@ struct ContentView: View {
                                     .help("System-managed routes cannot be edited")
                                 }
                             }
-                            
+
                             if !searchText.isEmpty {
                                 let searchType = getSearchTypeDescription(for: searchText)
                                 Text("Search: \(searchType)")
@@ -286,9 +286,9 @@ struct ContentView: View {
                             }
                         }
                     }
-                    
+
                     Spacer()
-                    
+
                     if let selectedID = selectedRouteID,
                        let selected = filteredRoutes.first(where: { $0.id == selectedID }) {
                         VStack(alignment: .trailing, spacing: 2) {
@@ -334,12 +334,12 @@ struct ContentView: View {
             routeManager.refreshRoutes()
         }
     }
-    
+
     private func deleteRoute(_ route: NetworkRoute) {
         selectedRouteID = route.id
         showingDeleteAlert = true
     }
-    
+
     private func confirmDeleteRoute(_ route: NetworkRoute) {
         routeManager.deleteRoute(route) { success, error in
             if !success {
@@ -347,7 +347,7 @@ struct ContentView: View {
             }
         }
     }
-    
+
     private func expireDescription(for expire: String) -> String {
         if expire.isEmpty {
             return "No expiration - route is permanent"
@@ -369,7 +369,7 @@ struct ContentView: View {
             return "Expiration time: \(expire)"
         }
     }
-    
+
     private func getSearchTypeDescription(for searchTerm: String) -> String {
         // Try to normalize the search term to understand its type
         if let normalized = normalizeSearchTerm(searchTerm) {
@@ -386,7 +386,7 @@ struct ContentView: View {
                 return "CIDR /\(normalized.prefixLength) network"
             }
         }
-        
+
         // Check if it's a CIDR notation
         if searchTerm.contains("/") {
             let components = searchTerm.components(separatedBy: "/")
@@ -394,7 +394,7 @@ struct ContentView: View {
                 return "CIDR /\(prefixLength) network"
             }
         }
-        
+
         // Check if it's an IP address
         let ipComponents = searchTerm.components(separatedBy: ".")
         if ipComponents.count == 4 {
@@ -411,16 +411,16 @@ struct ContentView: View {
                 return "IP address"
             }
         }
-        
+
         // Check if it looks like a gateway
         if searchTerm.contains(".") && !searchTerm.contains(" ") {
             return "Gateway or network"
         }
-        
+
         // Default to text search
         return "Text search"
     }
-    
+
     /// Normalizes a search term to CIDR format for type detection
     private func normalizeSearchTerm(_ searchTerm: String) -> CIDRInfo? {
         // If it's already in CIDR format, parse it directly
@@ -434,14 +434,14 @@ struct ContentView: View {
             }
             return CIDRInfo(networkAddress: networkAddress, prefixLength: prefixLength)
         }
-        
+
         // Handle shorthand notation
         let components = searchTerm.components(separatedBy: ".")
-        
+
         // Determine the prefix length based on the number of octets
         let prefixLength: Int
         let networkAddress: String
-        
+
         switch components.count {
         case 1:
             // Single octet: "127" -> "127.0.0.0/8"
@@ -450,7 +450,7 @@ struct ContentView: View {
             }
             prefixLength = 8
             networkAddress = "\(octet).0.0.0"
-            
+
         case 2:
             // Two octets: "192.168" -> "192.168.0.0/16"
             guard let octet1 = Int(components[0]), octet1 >= 0 && octet1 <= 255,
@@ -459,7 +459,7 @@ struct ContentView: View {
             }
             prefixLength = 16
             networkAddress = "\(octet1).\(octet2).0.0"
-            
+
         case 3:
             // Three octets: "192.168.1" -> "192.168.1.0/24"
             guard let octet1 = Int(components[0]), octet1 >= 0 && octet1 <= 255,
@@ -469,7 +469,7 @@ struct ContentView: View {
             }
             prefixLength = 24
             networkAddress = "\(octet1).\(octet2).\(octet3).0"
-            
+
         case 4:
             // Full IP address: "192.168.1.1" -> "192.168.1.1/32"
             guard let ipAddress = parseIPAddress(from: searchTerm) else {
@@ -477,29 +477,29 @@ struct ContentView: View {
             }
             prefixLength = 32
             networkAddress = ipAddress
-            
+
         default:
             return nil
         }
-        
+
         return CIDRInfo(networkAddress: networkAddress, prefixLength: prefixLength)
     }
-    
+
     /// Parses an IP address string
     private func parseIPAddress(from string: String) -> String? {
         let components = string.components(separatedBy: ".")
         guard components.count == 4 else { return nil }
-        
+
         for component in components {
             guard let octet = Int(component), octet >= 0 && octet <= 255 else {
                 return nil
             }
         }
-        
+
         return string
     }
 }
 
 #Preview {
     ContentView()
-} 
+}

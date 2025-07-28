@@ -21,22 +21,22 @@ import SwiftUI
 struct AddRouteView: View {
     @Environment(\.dismiss) private var dismiss
     @ObservedObject var routeManager: RouteManager
-    
+
     // Route to edit (nil for new routes)
     let editingRoute: NetworkRoute?
-    
+
     // Convenience initializer for new routes
     init(routeManager: RouteManager) {
         self.routeManager = routeManager
         self.editingRoute = nil
     }
-    
+
     // Initializer for editing existing routes
     init(routeManager: RouteManager, editingRoute: NetworkRoute?) {
         self.routeManager = routeManager
         self.editingRoute = editingRoute
     }
-    
+
     @State private var destination = ""
     @State private var gateway = ""
     @State private var interface = ""
@@ -45,7 +45,7 @@ struct AddRouteView: View {
     @State private var errorMessage = ""
     @State private var availableInterfaces: [String] = []
     @State private var showErrorDetails = false
-    
+
     // Advanced options
     @State private var routeFlags: Set<RouteFlag> = []
     @State private var mtu = ""
@@ -56,7 +56,7 @@ struct AddRouteView: View {
     @State private var sendpipe = ""
     @State private var recvpipe = ""
     @State private var ssthresh = ""
-    
+
     // Add a new enum for gateway type
     enum GatewayInputType: String, CaseIterable, Identifiable {
         case ip = "IP Address"
@@ -65,20 +65,20 @@ struct AddRouteView: View {
         var id: String { self.rawValue }
     }
     @State private var gatewayType: GatewayInputType = .ip
-    
+
     // Computed properties
     private var isEditing: Bool {
         editingRoute != nil
     }
-    
+
     private var windowTitle: String {
         isEditing ? "Edit Route" : "Add New Route"
     }
-    
+
     private var submitButtonTitle: String {
         isEditing ? "Update Route" : "Add Route"
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             // Header
@@ -86,12 +86,12 @@ struct AddRouteView: View {
                 Text(windowTitle)
                     .font(.title2)
                     .fontWeight(.bold)
-                
+
                 // Simplified privilege information
                 HStack {
                     Image(systemName: "info.circle")
                         .foregroundColor(.blue)
-                    
+
                     Text(isEditing ? "Administrator privileges will be requested when updating the route" : "Administrator privileges will be requested when adding the route")
                         .font(.caption)
                         .foregroundColor(.secondary)
@@ -100,7 +100,7 @@ struct AddRouteView: View {
             }
             .padding(.top, 20)
             .padding(.horizontal, 30)
-            
+
             // Main configuration form
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
@@ -109,22 +109,22 @@ struct AddRouteView: View {
                         Text("Route Configuration")
                             .font(.headline)
                             .foregroundColor(.primary)
-                        
+
                         VStack(alignment: .leading, spacing: 12) {
                             // Destination
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Destination")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                
+
                                 TextField("e.g., 192.168.1.0/24, 192.168.1, or 10", text: $destination)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .onChange(of: destination) { _ in validateInput() }
-                                
+
                                 // Destination interpretation and route type controls
                                 if !destination.isEmpty {
                                     let interpretation = NetworkRoute.interpretDestination(destination)
-                                    
+
                                     VStack(alignment: .leading, spacing: 8) {
                                         // Route Type Selection
                                         VStack(alignment: .leading, spacing: 4) {
@@ -132,35 +132,35 @@ struct AddRouteView: View {
                                                 .font(.caption)
                                                 .fontWeight(.medium)
                                                 .foregroundColor(.secondary)
-                                            
+
                                             Picker("Route Type", selection: $routeType) {
                                                 ForEach(RouteType.allCases, id: \.self) { type in
                                                     Text(type.displayName).tag(type)
                                                 }
                                             }
                                             .pickerStyle(SegmentedPickerStyle())
-                                            
+
                                             Text(routeType.description)
                                                 .font(.caption2)
                                                 .foregroundColor(.secondary)
                                         }
-                                        
+
                                         // Interpretation Display
                                         VStack(alignment: .leading, spacing: 4) {
                                             HStack {
                                                 Image(systemName: interpretation.isValid ? "checkmark.circle.fill" : "exclamationmark.triangle.fill")
                                                     .foregroundColor(interpretation.isValid ? .green : .orange)
-                                                
+
                                                 Text("Interpretation:")
                                                     .font(.caption)
                                                     .fontWeight(.medium)
                                                     .foregroundColor(.secondary)
-                                                
+
                                                 Text(interpretation.statusDescription)
                                                     .font(.caption)
                                                     .foregroundColor(interpretation.isValid ? .primary : .orange)
                                             }
-                                            
+
                                             if interpretation.isValid {
                                                 VStack(alignment: .leading, spacing: 2) {
                                                     if let networkForm = interpretation.networkForm {
@@ -177,7 +177,7 @@ struct AddRouteView: View {
                                                                 .cornerRadius(4)
                                                         }
                                                     }
-                                                    
+
                                                     if let hostForm = interpretation.hostForm {
                                                         HStack {
                                                             Text("As Host:")
@@ -199,13 +199,13 @@ struct AddRouteView: View {
                                     .padding(.top, 4)
                                 }
                             }
-                            
+
                             // Gateway
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Gateway")
                                     .font(.subheadline)
                                     .fontWeight(.medium)
-                                
+
                                 Picker("Gateway Type", selection: $gatewayType) {
                                     ForEach(AddRouteView.GatewayInputType.allCases) { type in
                                         Text(type.rawValue).tag(type)
@@ -213,7 +213,7 @@ struct AddRouteView: View {
                                 }
                                 .pickerStyle(SegmentedPickerStyle())
                                 .padding(.bottom, 4)
-                                
+
                                 TextField(gatewayType == .ip ? "e.g., 192.168.1.1 or 2001:db8::1" : (gatewayType == .iface ? "e.g., en0" : "e.g., 00:11:22:33:44:55"), text: $gateway)
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .disabled(gatewayType == .iface)
@@ -222,25 +222,25 @@ struct AddRouteView: View {
                                             gateway = interface
                                         }
                                     }
-                                
+
                                 Text(gatewayType == .ip ? "IPv4 or IPv6 address" : (gatewayType == .iface ? "Interface name (e.g., en0)" : "MAC address (e.g., 00:11:22:33:44:55)"))
                                     .font(.caption)
                                     .foregroundColor(.secondary)
-                                
+
                                 if isEditing && editingRoute?.displayGateway.isEmpty == true {
                                     Text("Note: Original route uses a non-IP gateway. Please enter a valid value.")
                                         .font(.caption)
                                         .foregroundColor(.orange)
                                 }
                             }
-                            
+
                             // Interface (conditional)
                             if gatewayType == .ip || gatewayType == .mac {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Interface (Optional)")
                                         .font(.subheadline)
                                         .fontWeight(.medium)
-                                    
+
                                     Picker("Interface", selection: $interface) {
                                         Text("Auto").tag("")
                                         ForEach(availableInterfaces, id: \.self) { interface in
@@ -252,10 +252,10 @@ struct AddRouteView: View {
                             }
                         }
                     }
-                    
+
                     Divider()
                         .padding(.vertical, 8)
-                    
+
                     // Advanced Options (Collapsible)
                     AdvancedOptionsSection(
                         routeFlags: $routeFlags,
@@ -276,7 +276,7 @@ struct AddRouteView: View {
                 .padding(.vertical, 20)
             }
             .frame(height: 450)
-            
+
             // Error message
             if !errorMessage.isEmpty {
                 VStack(spacing: 8) {
@@ -291,7 +291,7 @@ struct AddRouteView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                     }
                     .frame(maxHeight: 180) // Increased height for better readability
-                    
+
                     // Show Details button for modal
                     Button("Show Details") {
                         showErrorDetails = true
@@ -317,14 +317,14 @@ struct AddRouteView: View {
                     .frame(minWidth: 400, minHeight: 300)
                 }
             }
-            
+
             // Action buttons
             HStack(spacing: 15) {
                 Button("Cancel") {
                     dismiss()
                 }
                 .keyboardShortcut(.escape)
-                
+
                 Button(submitButtonTitle) {
                     if isEditing {
                         updateRoute()
@@ -347,32 +347,32 @@ struct AddRouteView: View {
             }
         }
     }
-    
+
     private var isValidInput: Bool {
         !destination.isEmpty && !gateway.isEmpty && errorMessage.isEmpty && !hasMutuallyExclusiveFlags
     }
-    
+
     private var hasMutuallyExclusiveFlags: Bool {
         // Check for mutually exclusive flag combinations
         return routeFlags.contains(.blackhole) && routeFlags.contains(.reject)
     }
-    
+
     private var flagCombinationError: String? {
         if routeFlags.contains(.blackhole) && routeFlags.contains(.reject) {
             return "Blackhole and Reject flags are mutually exclusive. A route cannot both silently drop packets (Blackhole) and send ICMP unreachable messages (Reject)."
         }
         return nil
     }
-    
+
     private func validateInput() {
         errorMessage = ""
-        
+
         // Check for mutually exclusive flag combinations first
         if let flagError = flagCombinationError {
             errorMessage = flagError
             return
         }
-        
+
         if !destination.isEmpty {
             let interpretation = NetworkRoute.interpretDestination(destination)
             if !interpretation.isValid {
@@ -380,7 +380,7 @@ struct AddRouteView: View {
                 return
             }
         }
-        
+
         if !gateway.isEmpty {
             switch gatewayType {
             case .ip:
@@ -410,15 +410,15 @@ struct AddRouteView: View {
             }
         }
     }
-    
+
     private func loadInterfaces() {
         availableInterfaces = routeManager.getNetworkInterfaces()
     }
-    
+
     private func initializeFormWithRoute(_ route: NetworkRoute) {
         destination = route.destination
         routeType = route.routeType
-        
+
         // Detect gateway type and set value/type accordingly (support both IPv4 and IPv6)
         if routeManager.isValidIPAddress(route.gateway) {
             gateway = route.gateway
@@ -433,17 +433,17 @@ struct AddRouteView: View {
             gateway = route.gateway
             gatewayType = .ip // Default fallback
         }
-        
+
         interface = route.interface
-        
+
         // Parse route flags
         let flagCharacters = Set(route.flags.map { String($0) })
         routeFlags = RouteFlag.allCases.filter { flagCharacters.contains($0.rawValue) }.reduce(into: Set<RouteFlag>()) { result, flag in
             result.insert(flag)
         }
-        
+
         expire = route.expire
-        
+
         // Fetch detailed metrics for this route
         if let detailedRoute = routeManager.getRouteDetails(for: route.destination) {
             mtu = detailedRoute.mtu
@@ -464,10 +464,10 @@ struct AddRouteView: View {
             ssthresh = route.ssthresh
         }
     }
-    
+
     private func addRoute() {
         isSubmitting = true
-        
+
         // Use the gateway value as entered, type is handled by backend
         let newRoute = NetworkRoute(
             destination: destination,
@@ -484,10 +484,10 @@ struct AddRouteView: View {
             recvpipe: recvpipe,
             ssthresh: ssthresh
         )
-        
+
         // Add advanced options to the route
         var advancedOptions: [String: String] = [:]
-        
+
         if !mtu.isEmpty { advancedOptions["mtu"] = mtu }
         if !hopCount.isEmpty { advancedOptions["hopcount"] = hopCount }
         if !rtt.isEmpty { advancedOptions["rtt"] = rtt }
@@ -495,10 +495,10 @@ struct AddRouteView: View {
         if !sendpipe.isEmpty { advancedOptions["sendpipe"] = sendpipe }
         if !recvpipe.isEmpty { advancedOptions["recvpipe"] = recvpipe }
         if !ssthresh.isEmpty { advancedOptions["ssthresh"] = ssthresh }
-        
+
         routeManager.addRoute(newRoute, advancedOptions: advancedOptions) { success, error in
             isSubmitting = false
-            
+
             if success {
                 dismiss()
             } else {
@@ -507,15 +507,15 @@ struct AddRouteView: View {
             }
         }
     }
-    
+
     private func updateRoute() {
         guard let originalRoute = editingRoute else { return }
-        
+
         isSubmitting = true
-        
+
         // First delete the original route
         routeManager.deleteRoute(originalRoute) { deleteSuccess, deleteError in
-            
+
             if deleteSuccess {
                 // Then add the updated route
                 let updatedRoute = NetworkRoute(
@@ -533,10 +533,10 @@ struct AddRouteView: View {
                     recvpipe: self.recvpipe,
                     ssthresh: self.ssthresh
                 )
-                
+
                 // Add advanced options to the route
                 var advancedOptions: [String: String] = [:]
-                
+
                 if !self.mtu.isEmpty { advancedOptions["mtu"] = self.mtu }
                 if !self.hopCount.isEmpty { advancedOptions["hopcount"] = self.hopCount }
                 if !self.rtt.isEmpty { advancedOptions["rtt"] = self.rtt }
@@ -544,11 +544,11 @@ struct AddRouteView: View {
                 if !self.sendpipe.isEmpty { advancedOptions["sendpipe"] = self.sendpipe }
                 if !self.recvpipe.isEmpty { advancedOptions["recvpipe"] = self.recvpipe }
                 if !self.ssthresh.isEmpty { advancedOptions["ssthresh"] = self.ssthresh }
-                
+
                 self.routeManager.addRoute(updatedRoute, advancedOptions: advancedOptions) { success, error in
                     DispatchQueue.main.async {
                         self.isSubmitting = false
-                        
+
                         if success {
                             self.dismiss()
                         } else {
@@ -590,9 +590,9 @@ struct AdvancedOptionsSection: View {
     @Binding var gatewayType: AddRouteView.GatewayInputType
     let isEditing: Bool
     let hasMutuallyExclusiveFlags: Bool
-    
+
     @State private var isExpanded = false
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             // Header with disclosure indicator
@@ -605,9 +605,9 @@ struct AdvancedOptionsSection: View {
                     Text("Advanced Options")
                         .font(.headline)
                         .foregroundColor(.primary)
-                    
+
                     Spacer()
-                    
+
                     Image(systemName: isExpanded ? "chevron.down" : "chevron.right")
                         .foregroundColor(.secondary)
                         .font(.caption)
@@ -615,7 +615,7 @@ struct AdvancedOptionsSection: View {
             }
             .buttonStyle(PlainButtonStyle())
             .padding(.vertical, 8)
-            
+
             // Expandable content
             if isExpanded {
                 VStack(alignment: .leading, spacing: 20) {
@@ -625,25 +625,25 @@ struct AdvancedOptionsSection: View {
                             Text("Route Flags")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                            
+
                             Image(systemName: "info.circle")
                                 .foregroundColor(.blue)
                                 .font(.caption)
                                 .help("Route flags control how the route behaves")
                         }
-                        
+
                         LazyVGrid(columns: [
                             GridItem(.flexible()),
                             GridItem(.flexible())
                         ], spacing: 6) {
                             ForEach(RouteFlag.allCases, id: \.self) { flag in
-                                let isConflicted = (flag == .blackhole && routeFlags.contains(.reject)) || 
+                                let isConflicted = (flag == .blackhole && routeFlags.contains(.reject)) ||
                                                   (flag == .reject && routeFlags.contains(.blackhole))
-                                
+
                                 HStack(spacing: 4) {
                                     Toggle(flag.displayName, isOn: Binding(
-                                        get: { 
-                                            self.routeFlags.contains(flag) 
+                                        get: {
+                                            self.routeFlags.contains(flag)
                                         },
                                         set: { isOn in
                                             if isOn {
@@ -656,7 +656,7 @@ struct AdvancedOptionsSection: View {
                                     .toggleStyle(CheckboxToggleStyle())
                                     .font(.caption)
                                     .help(flag.description)
-                                    
+
                                     if isConflicted {
                                         Image(systemName: "exclamationmark.triangle.fill")
                                             .foregroundColor(.orange)
@@ -666,28 +666,28 @@ struct AdvancedOptionsSection: View {
                                 }
                             }
                         }
-                        
+
                         // Show warning message for mutually exclusive flags
                         if hasMutuallyExclusiveFlags {
                             HStack(spacing: 4) {
                                 Image(systemName: "exclamationmark.triangle.fill")
                                     .foregroundColor(.orange)
                                     .font(.caption2)
-                                
+
                                 Text("Warning: Blackhole and Reject flags are mutually exclusive")
                                     .font(.caption2)
                                     .foregroundColor(.orange)
                             }
                             .padding(.top, 4)
                         }
-                        
+
                         // Show info message for phantom routes
                         if routeFlags.contains(.blackhole) || routeFlags.contains(.reject) {
                             HStack(spacing: 4) {
                                 Image(systemName: "info.circle.fill")
                                     .foregroundColor(.blue)
                                     .font(.caption2)
-                                
+
                                 Text("Note: Blackhole and Reject routes won't appear in the main route list but will function normally")
                                     .font(.caption2)
                                     .foregroundColor(.blue)
@@ -695,20 +695,20 @@ struct AdvancedOptionsSection: View {
                             .padding(.top, 4)
                         }
                     }
-                    
+
                     // Network Metrics
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Network Metrics")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                            
+
                             Image(systemName: "info.circle")
                                 .foregroundColor(.blue)
                                 .font(.caption)
                                 .help("Network metrics help optimize routing performance")
                         }
-                        
+
                         // First row: MTU and Hop Count
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -719,7 +719,7 @@ struct AdvancedOptionsSection: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.caption)
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Hop Count")
                                     .font(.caption)
@@ -729,7 +729,7 @@ struct AdvancedOptionsSection: View {
                                     .font(.caption)
                             }
                         }
-                        
+
                         // Second row: RTT and RTT Variance
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -740,7 +740,7 @@ struct AdvancedOptionsSection: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.caption)
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("RTT Variance")
                                     .font(.caption)
@@ -750,7 +750,7 @@ struct AdvancedOptionsSection: View {
                                     .font(.caption)
                             }
                         }
-                        
+
                         // Third row: Send and Receive Pipe
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -761,7 +761,7 @@ struct AdvancedOptionsSection: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.caption)
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Receive Pipe")
                                     .font(.caption)
@@ -771,7 +771,7 @@ struct AdvancedOptionsSection: View {
                                     .font(.caption)
                             }
                         }
-                        
+
                         // Fourth row: SSThresh and Expire
                         HStack(spacing: 12) {
                             VStack(alignment: .leading, spacing: 4) {
@@ -782,7 +782,7 @@ struct AdvancedOptionsSection: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .font(.caption)
                             }
-                            
+
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Expire (sec)")
                                     .font(.caption)
@@ -801,28 +801,26 @@ struct AdvancedOptionsSection: View {
     }
 }
 
-
-
 // MARK: - Route Flag Enum
 
 enum RouteFlag: String, CaseIterable {
-    case static_route = "S"
+    case staticRoute = "S"
     case reject = "R"
     case blackhole = "b"
     case llinfo = "L"
-    
+
     var displayName: String {
         switch self {
-        case .static_route: return "Static"
+        case .staticRoute: return "Static"
         case .reject: return "Reject"
         case .blackhole: return "Blackhole"
         case .llinfo: return "Link Info"
         }
     }
-    
+
     var description: String {
         switch self {
-        case .static_route: return "Static route - manually configured"
+        case .staticRoute: return "Static route - manually configured"
         case .reject: return "Reject route - sends ICMP unreachable"
         case .blackhole: return "Blackhole route - silently drops packets"
         case .llinfo: return "Link-level information available"
@@ -840,7 +838,7 @@ struct CheckboxToggleStyle: ToggleStyle {
                 .onTapGesture {
                     configuration.isOn.toggle()
                 }
-            
+
             configuration.label
         }
     }
@@ -848,4 +846,4 @@ struct CheckboxToggleStyle: ToggleStyle {
 
 #Preview {
     AddRouteView(routeManager: RouteManager())
-} 
+}

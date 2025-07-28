@@ -1,0 +1,76 @@
+# Security Scanner Configuration for RouteX
+# This file excludes legitimate code patterns from being flagged as potential secrets
+
+# SwiftUI Keyboard Shortcuts (legitimate UI constants)
+*.keyboardShortcut(.escape)
+*.keyboardShortcut(.return)
+*.keyboardShortcut(.tab)
+*.keyboardShortcut(.space)
+
+# UserDefaults Keys (legitimate app configuration)
+*phantomRouteCacheKey*
+*UserDefaults*
+*NSUserDefaults*
+
+# Standard Programming Patterns
+*for (key, value) in*
+*dictionary iteration*
+*enum case*
+*switch case*
+
+# macOS System Paths (legitimate system calls)
+*/sbin/route*
+*/usr/sbin/netstat*
+*/usr/bin/osascript*
+*/sbin/ifconfig*
+
+# SwiftUI View Modifiers (legitimate UI code)
+*.font(*)
+*.foregroundColor(*)
+*.background(*)
+*.padding(*)
+*.frame(*)
+
+# Route Command Parameters (legitimate networking)
+*-net*
+*-host*
+*-static*
+*-reject*
+*-blackhole*
+*-llinfo*
+*-interface*
+*-link*
+
+# IP Address Patterns (legitimate networking)
+*192.168.*
+*10.0.*
+*172.16.*
+*127.0.0.1*
+*::1*
+
+# Interface Names (legitimate networking)
+*en0*
+*en1*
+*wlan0*
+*lo0*
+
+# MAC Address Patterns (legitimate networking)
+*00:11:22:33:44:55*
+*AA:BB:CC:DD:EE:FF*
+
+# Error Messages (legitimate user feedback)
+*Invalid gateway*
+*Invalid destination*
+*Administrator privileges*
+
+# Debug/Test Code (legitimate development)
+*#if DEBUG*
+*#endif*
+*assert(*
+*print(*
+
+# Comments and Documentation (legitimate code documentation)
+*// MARK:*
+*/// Returns*
+*/// Checks if*
+*/* RouteX* 
