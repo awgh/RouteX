@@ -82,14 +82,36 @@ jobs:
       run: |
         echo "Checking code formatting..."
         
-        # Check for trailing whitespace
-        if grep -r " $" RouteX/ --exclude-dir=*.git --exclude=*.md; then
+        # Check for trailing whitespace (exclude binary files and assets)
+        if grep -r " $" RouteX/ \
+          --exclude-dir=*.git \
+          --exclude-dir=*.xcassets \
+          --exclude=*.png \
+          --exclude=*.jpg \
+          --exclude=*.jpeg \
+          --exclude=*.gif \
+          --exclude=*.ico \
+          --exclude=*.icns \
+          --exclude=*.plist \
+          --exclude=*.md \
+          --exclude=*.json; then
           echo "Error: Found trailing whitespace"
           exit 1
         fi
         
-        # Check for proper line endings
-        if grep -r $'\r' RouteX/ --exclude-dir=*.git --exclude=*.md; then
+        # Check for proper line endings (exclude binary files and assets)
+        if grep -r $'\r' RouteX/ \
+          --exclude-dir=*.git \
+          --exclude-dir=*.xcassets \
+          --exclude=*.png \
+          --exclude=*.jpg \
+          --exclude=*.jpeg \
+          --exclude=*.gif \
+          --exclude=*.ico \
+          --exclude=*.icns \
+          --exclude=*.plist \
+          --exclude=*.md \
+          --exclude=*.json; then
           echo "Error: Found Windows line endings"
           exit 1
         fi

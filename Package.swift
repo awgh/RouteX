@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         // No external dependencies required
-        .package(url: "https://github.com/nalexn/ViewInspector.git", from: "0.9.11", to: "0.10.1"),
+        .package(url: "https://github.com/nalexn/ViewInspector.git", "0.9.11"..<"0.10.2"),
     ],
     targets: [
         .executableTarget(
@@ -33,8 +33,7 @@ let package = Package(
             ],
             resources: [
                 .process("Assets.xcassets"),
-                .process("Preview Content/Preview Assets.xcassets"),
-                .copy("Info.plist")
+                .process("Preview Content/Preview Assets.xcassets")
             ]
         ),
         .testTarget(
