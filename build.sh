@@ -123,8 +123,8 @@ echo "Distribution package created: $BUILD_DIR/RouteX.zip"
 echo "This zip file will extract to a folder containing RouteX.app"
 
 # Optional: Open the app
-read -p "Would you like to open the app now? (y/n): " -n 1 -r
-echo
-if [[ $REPLY =~ ^[Yy]$ ]]; then
-    open "$APP_PATH"
-fi 
+#read -p "Would you like to open the app now? (y/n): " -n 1 -r
+#echo
+#if [[ $REPLY =~ ^[Yy]$ ]]; then
+#    open "$APP_PATH"
+#fi 
