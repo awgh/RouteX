@@ -16,7 +16,7 @@ let package = Package(
     ],
     dependencies: [
         // No external dependencies required
-        .package(url: "https://github.com/nalexn/ViewInspector.git", from: "0.9.11"),
+        .package(url: "https://github.com/nalexn/ViewInspector.git", from: "0.9.11", to: "0.10.1"),
     ],
     targets: [
         .executableTarget(
@@ -30,6 +30,11 @@ let package = Package(
                 "RouteManager.swift",
                 "RouteModel.swift",
                 "CustomTooltip.swift"
+            ],
+            resources: [
+                .process("Assets.xcassets"),
+                .process("Preview Content/Preview Assets.xcassets"),
+                .copy("Info.plist")
             ]
         ),
         .testTarget(
@@ -40,7 +45,13 @@ let package = Package(
             ],
             path: "RouteXTests",
             exclude: ["README.md", "routex.code-workspace"],
-            sources: ["BasicFunctionalityTests.swift", "ComprehensiveTests.swift"]
+            sources: [
+                "BasicFunctionalityTests.swift", 
+                "ComprehensiveTests.swift",
+                "AddRouteViewTests.swift",
+                "RouteManagerTests.swift",
+                "RouteModelTests.swift"
+            ]
         ),
     ]
 ) 
