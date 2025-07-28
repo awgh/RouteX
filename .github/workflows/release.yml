@@ -9,6 +9,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    permissions:
+      contents: write
+      packages: write
     
     steps:
     - name: Checkout code
@@ -48,15 +51,29 @@ jobs:
         # Copy RouteX.zip from build directory to root for release upload
         cp build/RouteX.zip RouteX-${{ steps.get_version.outputs.VERSION }}.zip
         
-    - name: Delete existing release if it exists
+    - name: Check and delete existing release
       if: startsWith(github.ref, 'refs/tags/')
       run: |
         echo "Checking for existing release for tag: ${{ steps.get_version.outputs.VERSION }}"
         
-        # Try to delete existing release (this will fail silently if no release exists)
-        if gh release view ${{ steps.get_version.outputs.VERSION }} >/dev/null 2>&1; then
-          echo "Found existing release, deleting it..."
-          gh release delete ${{ steps.get_version.outputs.VERSION }} --yes
+        # Use GitHub API to check for existing release
+        RELEASE_RESPONSE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.get_version.outputs.VERSION }}" 2>&1)
+        
+        echo "GitHub API response: $RELEASE_RESPONSE"
+        
+        # Check if response contains an "id" field (indicating release exists)
+        if [[ "$RELEASE_RESPONSE" == *"\"id\":"* ]]; then
+          echo "Found existing release, extracting release ID..."
+          RELEASE_ID=$(echo "$RELEASE_RESPONSE" | grep -o '"id":[0-9]*' | cut -d':' -f2)
+          echo "Release ID: $RELEASE_ID"
+          
+          echo "Deleting existing release..."
+          DELETE_RESPONSE=$(curl -s -X DELETE \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/$RELEASE_ID" 2>&1)
+          
+          echo "Delete response: $DELETE_RESPONSE"
           echo "Existing release deleted"
         else
           echo "No existing release found"
@@ -64,7 +81,9 @@ jobs:
         
     - name: Create Release (Tagged Releases)
       if: startsWith(github.ref, 'refs/tags/')
+      id: create_release
       uses: softprops/action-gh-release@v1
+      continue-on-error: true
       with:
         files: |
           RouteX-${{ steps.get_version.outputs.VERSION }}.dmg
@@ -107,6 +126,49 @@ jobs:
           DMG SHA256: $(shasum -a 256 RouteX-${{ steps.get_version.outputs.VERSION }}.dmg | cut -d' ' -f1)
           ZIP SHA256: $(shasum -a 256 RouteX-${{ steps.get_version.outputs.VERSION }}.zip | cut -d' ' -f1)
           ```
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        
+    - name: Create Release via GitHub CLI (Fallback)
+      if: startsWith(github.ref, 'refs/tags/') && steps.create_release.outcome == 'failure'
+      run: |
+        echo "Softprops action failed, trying GitHub CLI fallback..."
+        
+        # Create release using GitHub CLI
+        gh release create ${{ steps.get_version.outputs.VERSION }} \
+          --title "RouteX ${{ steps.get_version.outputs.VERSION }}" \
+          --notes "## RouteX ${{ steps.get_version.outputs.VERSION }}
+          
+          ### Installation
+          1. **DMG Installation**: Download the DMG file, open it, and drag RouteX to Applications
+          2. **ZIP Installation**: Download the ZIP file, extract it, and drag RouteX.app to Applications
+          3. Launch RouteX from Applications
+          4. Grant administrator privileges when prompted for route modifications
+          
+          ### System Requirements
+          - macOS 12.0 (Monterey) or later
+          - Apple Silicon (M1/M2/M3) or Intel Mac - Universal binary supports both architectures
+          - Administrator privileges (required for route modification)
+          
+          ### What's New
+          - Universal binary for Apple Silicon and Intel Macs
+          - Graphical interface for network route management
+          - Smart input handling for macOS routing shorthand
+          - Phantom route discovery for blackhole/reject routes
+          
+          ### Features
+          - Add, edit, and delete network routes
+          - Route type control (Auto, Network, Host)
+          - Advanced routing features (flags, metrics, interface scope)
+          - Real-time validation and safety checks
+          
+          ### Support
+          - [GitHub Issues](https://github.com/awgh/routex/issues)
+          - [Documentation](https://github.com/awgh/routex#readme)" \
+          RouteX-${{ steps.get_version.outputs.VERSION }}.dmg \
+          RouteX-${{ steps.get_version.outputs.VERSION }}.zip
+        
+        echo "Release created successfully via GitHub CLI"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
